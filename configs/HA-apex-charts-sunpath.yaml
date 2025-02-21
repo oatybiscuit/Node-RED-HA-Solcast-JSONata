@@ -1,0 +1,72 @@
+type: custom:apexcharts-card
+span:
+  end: day
+header:
+  show: true
+  title: Sun Path
+yaxis:
+  - min: -64
+    max: 64
+    apex_config:
+      tickAmount: 8
+now:
+  show: false
+  label: time
+show:
+  last_updated: true
+series:
+  - entity: sensor.sun_details
+    data_generator: |
+      return entity.attributes.grapharray.time.map((time, index) => {
+        return [time, entity.attributes.grapharray.sunpath[index]];
+      });
+    curve: smooth
+    name: Sun Path
+    show:
+      legend_value: false
+    stroke_width: 2
+    color: orange
+  - entity: sensor.sun_details
+    data_generator: |
+      return entity.attributes.grapharray.time.map((time, index) => {
+        return [time, entity.attributes.grapharray.horizon[index]];
+      });
+    curve: smooth
+    name: Horizon
+    show:
+      legend_value: false
+    stroke_width: 1
+    color: blue
+  - entity: sensor.sun_details
+    data_generator: |
+      return entity.attributes.grapharray.time.map((time, index) => {
+        return [time, 0];
+      });
+    curve: smooth
+    name: Land
+    show:
+      legend_value: false
+    stroke_width: 1
+    color: grey
+  - entity: sensor.sun_details
+    data_generator: |
+      return entity.attributes.grapharray.time.map((time, index) => {
+        return [time, entity.attributes.grapharray.sunnow[index]];
+      });
+    curve: smooth
+    name: Sun Position
+    show:
+      legend_value: false
+    stroke_width: 4
+    color: red
+  - entity: sensor.sun_details
+    data_generator: |
+      return entity.attributes.grapharray.time.map((time, index) => {
+        return [time, entity.attributes.grapharray.plane[index]];
+      });
+    curve: smooth
+    name: Planes
+    show:
+      legend_value: false
+    stroke_width: 4
+    color: green

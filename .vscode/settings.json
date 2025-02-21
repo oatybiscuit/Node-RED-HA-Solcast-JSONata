@@ -1,6 +1,42 @@
 {
     "cSpell.words": [
         "actuals",
-        "Solcast"
-    ]
+        "analysed",
+        "authorisation",
+        "fcactual",
+        "fchours",
+        "fchr",
+        "fcold",
+        "fcwatts",
+        "fcwh",
+        "isshade",
+        "Luxon",
+        "neighbour's",
+        "oldvalue",
+        "organisation",
+        "parms",
+        "powertable",
+        "Solcast",
+        "tzused",
+        "upto",
+        "neighbour",
+        "dayfrom",
+        "dayupto",
+        "usedup",
+        "npskew",
+        "hindcast",
+        "Hindcast",
+        "todayest",
+        "yaxis",
+        "grapharray",
+        "sunpath",
+        "sunnow",
+        "dayis",
+        "utime"
+    ],
+    "markdownlint.config": {
+        "MD033": {
+            "allowed_elements": ["details", "summary"]
+        }
+    }
 }

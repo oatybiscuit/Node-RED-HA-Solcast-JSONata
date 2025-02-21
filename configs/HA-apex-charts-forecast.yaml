@@ -1,0 +1,67 @@
+type: custom:apexcharts-card
+graph_span: 3d
+span:
+  end: day
+  offset: +1d
+header:
+  show: true
+  title: "Solcast: yesterday - today - tomorrow"
+yaxis:
+  - min: 0
+    max: ~1500
+    apex_config:
+      tickAmount: 6
+now:
+  show: true
+  label: now
+show:
+  last_updated: true
+series:
+  - entity: sensor.solcast_daily_graph_table
+    data_generator: |
+      return entity.attributes.time.map((fchr, index) => {
+        return [new Date(fchr).getTime(), entity.attributes.yesterday[index]];
+      });
+    curve: smooth
+    name: Yesterday
+    show:
+      in_header: false
+      legend_value: false
+    stroke_width: 2
+    color: magenta
+  - entity: sensor.solcast_daily_graph_table
+    data_generator: |
+      return entity.attributes.time.map((fchr, index) => {
+        return [new Date(fchr).getTime(), entity.attributes.today[index]];
+      });
+    curve: smooth
+    name: Today
+    show:
+      in_header: false
+      legend_value: false
+    stroke_width: 2
+    color: orange
+  - entity: sensor.solcast_daily_graph_table
+    data_generator: |
+      return entity.attributes.time.map((fchr, index) => {
+        return [new Date(fchr).getTime(), entity.attributes.actual[index]];
+      });
+    curve: smooth
+    name: Actual
+    show:
+      in_header: false
+      legend_value: false
+    stroke_width: 2
+    color: blue
+  - entity: sensor.solcast_daily_graph_table
+    data_generator: |
+      return entity.attributes.time.map((fchr, index) => {
+        return [new Date(fchr).getTime(), entity.attributes.tomorrow[index]];
+      });
+    curve: smooth
+    name: Tomorrow
+    show:
+      in_header: false
+      legend_value: false
+    stroke_width: 2
+    color: green

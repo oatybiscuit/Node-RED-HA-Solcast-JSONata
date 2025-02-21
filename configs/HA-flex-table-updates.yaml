@@ -1,0 +1,32 @@
+type: custom:flex-table-card
+title: Solcast Forecast Updates Today
+entities:
+  include: sensor.solcast_update_history
+columns:
+  - data: updates
+    modify: x.update
+    name: Hour
+  - data: updates
+    modify: x.state
+    name: OK
+  - data: updates
+    modify: x.low
+    name: Low
+  - data: updates
+    modify: x.median
+    name: Med
+  - data: updates
+    modify: x.high
+    name: High
+  - data: updates
+    modify: x.range
+    name: Rng
+  - data: updates
+    modify: x.sigma
+    name: Sig
+  - data: updates
+    modify: x.npskew
+    name: NPS
+  - data: updates
+    modify: x.actual
+    name: Act

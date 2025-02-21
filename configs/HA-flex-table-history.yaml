@@ -1,0 +1,26 @@
+type: custom:flex-table-card
+title: Solcast API History
+entities:
+  include: sensor.solcast_update_history
+columns:
+  - data: history
+    modify: x.dayis
+    name: Day
+  - data: history
+    modify: x.utime
+    name: Time
+  - data: history
+    modify: x.modes
+    name: Call
+  - data: history
+    modify: x.response
+    name: Response
+  - data: history
+    modify: x.outcome
+    name: ""
+  - data: history
+    modify: x.usedup
+    name: Used
+  - data: history
+    modify: x.records
+    name: Count
