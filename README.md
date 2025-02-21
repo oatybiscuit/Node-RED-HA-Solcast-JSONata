@@ -11,12 +11,10 @@
 
 A **Node-RED** flow to read, analyze and save into context **Solcast Solar API forecasts** using **JSONata**. Manage one or two solar planes in a Solcast Home-User account and store forecast with actual production history for up to five days including yesterday, today, and tomorrow. Ability to create sensors in **Home Assistant** for current power forecast and total energy forecasts for today and tomorrow, with potential for use and display in graphs and automations.
 
-![node-red-flow](images/NodeREDFlowSolcast.png)
-
 >[!NOTE]
 > I am not connected in any way with Solcast. There are other interpretations for the details of the data returned from the API.
 
-:
+![Node-RED-flow](images/NR-Solcast-flow.png)
 
 >[!CAUTION]
 > This flow is partly experimental, with a view to obtaining detailed information from Solcast API calls, and to find how to improve a reliable match between forecast and actual solar production. Some parts of the flow remain experimental, notably shading. The arrangement obtains, holds, and analyses as much detail as possible, well beyond a simple 'solar forecast for today'. This flow works, and provides a 90-105% match during most of the year for my own arrangement. This may not be suitable for your own purposes or situation.
