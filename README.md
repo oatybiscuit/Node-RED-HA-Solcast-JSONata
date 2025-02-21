@@ -233,7 +233,7 @@ In full detail:
     - if you do have a working HomeAssistant server, ensure this is correctly selected in the *Server* entry field
   - update the *server* node, the *ha-entity-config* node, and finally save the *sensor* node and redeploy the flow once you have updated all the sensor nodes
 
-![configuration-setup](images/configsetup.png)
+![configuration-setup](images/ConfigSetup.png)
 
 </details>
 
