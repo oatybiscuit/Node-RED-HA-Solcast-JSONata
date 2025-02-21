@@ -11,14 +11,18 @@
 
 A **Node-RED** flow to read, analyze and save into context **Solcast Solar API forecasts** using **JSONata**. Manage one or two solar planes in a Solcast Home-User account and store forecast with actual production history for up to five days including yesterday, today, and tomorrow. Ability to create sensors in **Home Assistant** for current power forecast and total energy forecasts for today and tomorrow, with potential for use and display in graphs and automations.
 
-![node-red-flow](/images/NodeREDFlowSolcast.png)
+![node-red-flow](images/NodeREDFlowSolcast.png)
 
 >[!NOTE]
 > I am not connected in any way with Solcast. There are other interpretations for the details of the data returned from the API.
->
+
+:
+
 >[!CAUTION]
 > This flow is partly experimental, with a view to obtaining detailed information from Solcast API calls, and to find how to improve a reliable match between forecast and actual solar production. Some parts of the flow remain experimental, notably shading. The arrangement obtains, holds, and analyses as much detail as possible, well beyond a simple 'solar forecast for today'. This flow works, and provides a 90-105% match during most of the year for my own arrangement. This may not be suitable for your own purposes or situation.
->
+
+:
+
 >[!WARNING]
 > This flow uses JSONata to process the large and complex arrays of data involved. JSONata is a powerful language for processing JSON structures, but it sacrifices efficiency for simplicity. Since Node-RED is single-thread, processing the API call return can take several seconds, and **this will block all other Node-RED processing while this happens**. This is more noticeable at the peak of the solar year where the solar day is longer than 14 hours. **This code should be used with care on the same Node-RED instance as other highly time-critical applications.** The component parts of the processing have been separated into individual nodes with smaller tasks and delay breaks between, so as to mitigate the effect. API calls should be timed where possible to avoid other significant activity.
 
@@ -160,11 +164,11 @@ After creating an account with Solcast you will be able to add one or two planes
 ]
 ```
 
-![resource-id](/images/SetResourceID.png)
+![resource-id](images/SetResourceID.png)
 
 The **API Key** can be found in Solcast in your account section, under 'Your Api Key'. Copy this and enter it into the http request node **API**. Under 'Use Authentication' the Type is '**bearer authentication**' and the Token is the API Key.
 
-![authorisation-api-key](/images/SetAuthorisation.png)
+![authorisation-api-key](images/SetAuthorisation.png)
 
 **Your API Key is confidential** and must not be shared. Do not copy this code unless you have first removed the API Key and the Resource Id list.
 
@@ -179,7 +183,7 @@ When Node-RED is run as a Home Assistant add-on package, the Node-RED environmen
 
 The flow tab in which the code sits can be edited, and an environment variable 'TZ' added with a valid timezone name, such as 'Europe/London'. The code uses this variable first, then uses the Luxon 'guess' next, following by a hard-coded value in the function node. The value used is reported back in the timezone context variable [solarDST.tzused] so it is easy to check, and it is easy to change the TZ value in the flow for testing or should you wish to run a solar system in a different timezone to the Node-RED machine.
 
-![set timezone in flow](/images/SetFlowTZ.png)
+![set timezone in flow](images/SetFlowTZ.png)
 
 </details>
 
@@ -231,7 +235,7 @@ In full detail:
     - if you do have a working HomeAssistant server, ensure this is correctly selected in the *Server* entry field
   - update the *server* node, the *ha-entity-config* node, and finally save the *sensor* node and redeploy the flow once you have updated all the sensor nodes
 
-![configuration-setup](/images/configsetup.png)
+![configuration-setup](images/configsetup.png)
 
 </details>
 
@@ -248,11 +252,11 @@ Since solar PV inverters record the instantaneous *power*, this must be converte
 
 **If you do not already have a solar energy sensor**, use the Home Assistant *Helper* to create a Riemann Sum, based on a solar power sensor. Ensure that the name and flow History node sensor name matches, use your *input sensor* of choice, set precision, metric prefix, and time period as shown. The integration method can be either Trapezoidal (for best results with an input sensor updated several time a minute) or Left (for sensors updated less often).
 
-![Riemann Sum helper setup](/images/Riemann-integration-helper.png)
+![Riemann Sum helper setup](images/Riemann-integration-helper.png)
 
 The sensor used to capture actual energy should show an increasing value of kWh to two decimal places, and in Home Assistant should look similar to:
 
-![Solar total energy sensor](/images/solar-energy-sensor.png)
+![Solar total energy sensor](images/solar-energy-sensor.png)
 
 ### Matching the solar forecast to actual power
 
@@ -421,7 +425,7 @@ Details on how Node-RED context works can be found [here](https://nodered.org/do
 
 In any situation where the data become corrupt for any reason, one or more of the context variables can be deleted manually and the flow should recreate the necessary variable at the next API call.
 
-![Context read and write by Node](/images/NodeContextList.png)
+![Context read and write by Node](images/NodeContextList.png)
 
 </details>
 
@@ -449,7 +453,7 @@ The application of shading impact is currently *experimental*, and carried out o
 
 The more critical shading conditions occur during solar winter and for ground mounted and east-west facing planes, particularly when the forecast is for clear sky during the full day. In these situations, horizon shading will have a significant impact that cannot be modelled by using the 10 percentile alone. To potentially assist with creating better shading models, the solar tracking includes sun path span, clear and shaded sky area figures, and sun arc path length, with full path and shaded path figures provided. This information is not currently used, but it is hoped that better models can be developed at some point.
 
-![The Effect Of Shading](/images/HowShadingEffectsSolarPV.png)
+![The Effect Of Shading](images/HowShadingEffectsSolarPV.png)
 
 On clear days with full sun, each shaded period could have the forecast value de-rated by 80-85%, however this requires more information than is currently provided to decide when and by how much to apply de-rating. When the ratio of the clear sky to total sky, or the clear sun arc to total sun arc, becomes less than 0.7 it *may* be appropriate to apply *this* ratio to the forecast when a full-sun figure is predicted. For example, during December and January for my own east-west installation, the sun path shows as above, and shading impact is clearly significant. In the most extreme at winter solstice, shading applies fully from sunrise at 08:00 to the 11:30-12:00 period, and then from 14:00 to sunset at 16:30. One plane is ENE on a single storey site, and shading of that plane lasts from sunrise to solar noon, effectively the entirety of the incidental solar period. This curtails output from this plane to just indirect solar, or about 0.3 kWh rather than 1.5 kWh as forecast (for this plane) for a full sun day.
 
@@ -466,7 +470,7 @@ You can see that updates from repeated API forecast calls will change the foreca
 
 Since the 'day total forecast' is the summation of all the period power values, that is the area under the curve, when updates occur the forecast will change. Again, observation suggests that changes seen in the three-hour forward window are more about time precision of cloud cover than change in the overall cloud cover expected. This means that the overall total for the day remains reasonably static, even if the imminent prediction for the next few hours changes. The curve may go up in one place, and down in another, and only a review of 'yesterday' using a hind-cast will show how good the forecast was. For this reason, I personally would rely on the figure for the total forecast for the day, taken close to sunrise, and rely in moderation on the figure for the next hour or two, and only after a recent update.
 
-![Sun Path at Solar Winter](/images/ForecastUpdates.png)
+![Sun Path at Solar Winter](images/ForecastUpdates.png)
 
 </details>
 
@@ -884,7 +888,7 @@ The flow includes three **Node-RED dashboard graphs**. The full five day forecas
 
 The full five day graph is generated from the half-hour update and is refreshed every half-hour to show the available forecasts and hind-casts, with the updated actual solar recorded.
 
-![Node-RED five day graph](/images/NodeREDfiveDayGraph.png)
+![Node-RED five day graph](images/NodeREDfiveDayGraph.png)
 
 </details>
 
@@ -893,7 +897,7 @@ The full five day graph is generated from the half-hour update and is refreshed 
 
 The cumulative graph is generated from the half-hour update, but only updated every half-hour during the solar day (including civil twilight). This shows the cumulative sum of the total kWh *energy* at each half hour for the low, shaded median, and high forecast predictions, together with the actual solar PV energy.
 
-![Node-RED cumulative graph](/images/NodeREDcumulativeGraph.png)
+![Node-RED cumulative graph](images/NodeREDcumulativeGraph.png)
 
 This particular example, from a variable cloudy day in early spring, demonstrates the wide range between the best and worst forecast. On a clear sunny day the best total day forecast for this day would be close to 7 kWh, but if the day is entirely cloudy this would be only 2 kWh. With variable cloud, the spread between best and worst cases is much wider. The flow uses the median, with adjustment for shading by taking the lower forecast during periods of shade. This example demonstrates how closely the actual solar *normally* follows the median, ending the day around 90-110 percent of the final median value.
 
@@ -906,7 +910,7 @@ The updates graph is generated from the detailed analysis for the today-forecast
 
 The graph plots the various API call update *power* forecasts and shows the forecast average power at each half hour period. Each update is shown in entirety, and also the actual solar PV power equivalent taken from the actual energy readings. The series labels are auto-generated with the update time, as is the actual solar power.
 
-![Node-RED updates graph](/images/NodeREDupdatesGraph.png)
+![Node-RED updates graph](images/NodeREDupdatesGraph.png)
 
 This particular example demonstrates the challenges of obtaining a good forecast with only limited API calls. The update plots will only appear following a successful API call, so in this case the first arrives between 01:30 and 02:00, and is thus labeled as the start of the half-hour period to which it relates.
 
@@ -921,7 +925,7 @@ The next update occurs for 07:00, with minor changes. This is followed by the 10
 
 The graph configuration used here shows the forecast figures over a complete 3 day period for 'yesterday', 'today' and 'tomorrow'.
 
-![Apex Charts Graph](/images/HA_Apex_Charts_graph.png)
+![Apex Charts Graph](images/HA_Apex_Charts_graph.png)
 
 Card settings:
 
@@ -1010,7 +1014,7 @@ series:
 
 The sun path graph provides a visual display of the position of the sun, and is updated every time HA updates the sun sensor.
 
-![HA sun path graph](/images/HA_Sun_Path_graph.png)
+![HA sun path graph](images/HA_Sun_Path_graph.png)
 
 This is stand-alone code, so it could be used anywhere and just for fun. At my latitude (London UK) the sun elevation moves quite considerably during the year, and the horizon mapping shows clearly the shading experienced during the winter months.
 
@@ -1106,7 +1110,7 @@ Much of the data provided comes in *arrays* of values. One easy way to display a
 
 The API call history and the Forecast Updates are ideal as tables. Note here the hind-cast API call failed to execute correctly. Without a recorded trace on the API history this failure would be impossible to identify and debug.
 
-![HA tables](/images/HA_Tables.png)
+![HA tables](images/HA_Tables.png)
 
 Here is the code required for the API history:
 
