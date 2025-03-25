@@ -28,13 +28,13 @@ A **Node-RED** flow to read, analyze and save into context **Solcast Solar API f
 
 - Make sure you have **Node-RED working**.
 - Obtain a **Hobbyist account with Solcast**, configure your one or two planes, and obtain the **plane resource codes and account API key**.
-- **Download the release .json file and import** this directly into Node-RED.
+- **Download the latest release .json file and import** this directly into Node-RED.
 - Change the settings:
   - **Configure the plane [P List node] and authorisation [API node] codes into the flow**.
   - Make sure you have your **timezone set** in either Node-RED as a Home Assistant add-on, or in the flow environment variable 'TZ'.  
   - Optionally, if you have a file-based context store, modify the context settings to use file rather than memory. See [can I save context over a restart](#questions-you-might-want-to-ask).
   - Optionally add your horizon settings for the shading calculator [Load Horizon] and set your plane(s) for the sun-path graph [Update SUN].  
-- If you are using Home Assistant, **edit the sensors and sensor configuration nodes to enable them and set them with your home assistant server**. Also **configure the solar-power sensor** for solar PV history and enable both current state and events state nodes.
+- If you are using *Home Assistant*, **edit the sensors and sensor configuration nodes to enable them and set them with your home assistant server**. Also **configure the solar-power sensor** for solar PV history and enable both current state and events state nodes. You will also need to have both the utc date-time and iso date-time entity sensors available: [HA time-date integration](https://www.home-assistant.io/integrations/time_date/)
 - If you are going to use the Node-RED graphs, the graph nodes will need to be enabled and the dashboard settings checked.
 - Fire at least **one API forecast call manually to create and populate all the context variables**, and then configure the triggers for either your *fixed* or *automatic* times.
 
@@ -295,9 +295,16 @@ The sun path tracker provides details of the current sun path and shading, which
 
 </details>
 
+<details>
+<summary> Home Assistant Time sensors (UTC & ISO) for the sun-path flow </summary>
+
+The main flow computes both UTC and local time using the Luxon library. The solar tracking flow operates independently (with a view to possible re-use). Getting local time using JSONata can be done, but an assured approach is to access the time sensors in Home Assistant. Optional time sensors can be added for dates and times, and this flow uses the sensor.date_time_utc and sensor.date_time_iso entities. For correct operation, these need to be added. This can be done easily using the DateTime integration.
+
+</details>
+
 ## Using this Node-RED flow
 
-The flow should run without issue. Solcast does have occasional maintenance outage periods (during Europe night). The flow here has no error checking or recovery - if the API calls fail then the call will be repeated only at the next scheduled trigger point. Rate-limiting errors (429) will be re-attempted [please note that this code feature has not yet been tested in a live situation as at February 2025].
+The flow should run without issue. Solcast does have occasional maintenance outage periods (during Europe night). The flow here has no error checking or recovery - if the API calls fail then the call will be repeated only at the next scheduled trigger point. Rate-limiting errors (response 429) will be re-attempted [please note that this code feature has been tested and debugged, but not yet fully tested in a live situation as at March 2025].
 
 ### Questions you might want to ask
 
@@ -324,7 +331,7 @@ For the fixed time schedule, set your times in the JSON object in the inject nod
 }
 ```
 
-The automatic schedule [experimental at this state] will attempt to spread the API forecast calls out over the solar day. Again, history can be `""` to turn off.`First_by`will issue one forecast to complete prior to the time given, so if you require a forecast for today before utility energy off-peak period at 02:00, then set this as shown. First-by 00:00 will not work (use 00:30), and if the first-by call falls on or after a time during the solar day, it will not be used. The`plane_count`and`call_limit`figures are used to account for the number of API calls required for the optional history and possible first-by, and then the remaining calls are calculated across the solar day, starting at sunrise. An integer gap of at least one hour is applied, and any calls falling at or after sunset are ignored. If history and forecast are requested at the same time, then two or four API calls will be made for both (forecast and estimates) and should execute correctly.
+The automatic schedule [experimental at this stage] will attempt to spread the API forecast calls out over the solar day. Again, history can be `""` to turn off.`First_by`will issue one forecast to complete prior to the time given, so if you require a forecast for today before utility energy off-peak period at 02:00, then set this as shown. First-by 00:00 will not work (use 00:30), and if the first-by call falls on or after a time during the solar day, it will not be used. The`plane_count`and`call_limit`figures are used to account for the number of API calls required for the optional history and possible first-by, and then the remaining calls are calculated across the solar day, starting at sunrise. An integer gap of at least one hour is applied, and any calls falling at or after sunset are ignored. If history and forecast are requested at the same time, then two or four API calls will be made for both (forecast and estimates) and should execute correctly.
 
 ```javascript
 {"history": "03:00",
@@ -335,7 +342,7 @@ The automatic schedule [experimental at this state] will attempt to spread the A
 }
 ```
 
-It is necessary for at least one API call to be triggered manually first to generate the DST context variable (used by both fixed and automatic) and for the Home Assistant sensor.sun to update and provide the sunrise and sunset times for the automatic timer [thus this will not work if you are not connected to Home Assistant]. The times are floored to half-hours, and the starting point for automatic times will be sunrise. This start point can be shifted by the`start_shift`parameter, set between `-8` and `8` which moves the start by four hours earlier or later than sunrise. Then end of the time range will always remain at sunset, and therefore the last API call will be the 'spacing gap' time *before* sunset.
+It is necessary for at least one API call to be triggered manually first to generate the DST context variable (used by both fixed and automatic) and for the Home Assistant sun.sun sensor to update and provide the sunrise and sunset times for the automatic timer [thus this will not work if you are not connected to Home Assistant]. The times are floored to half-hours, and the starting point for automatic times will be sunrise. This start point can be shifted by the`start_shift`parameter, set between `-8` and `8` which moves the start by four hours earlier or later than sunrise. Then end of the time range will always remain at sunset, and therefore the last API call will be the 'spacing gap' time *before* sunset.
 
 </details>
 
@@ -739,6 +746,23 @@ Again it should be clearly noted that since the forecasts only affect the period
 
 </details>
 
+<details>
+<summary> Summary Analysis (fc_summary) </summary>
+
+This analysis brings together *from yesterday* the *actual* solar energy recorded together with the day-ahead *forecast* and the day-after *hindcast*, and provides a full set of forecast performance ratio values.
+
+![Summary Analysis for yesterday](images/Summary-Analysis.png)
+
+Since the forecast changes throughout the day, this analysis provides the average of all available forecasts of the day, and also provides the average shaded forecast. The very first (shaded) forecast is also given. The hindcast will only be available if one has been called for.
+
+The shaded-forecast to average-forecast ratio ('shade_ratio') indicates the *practical impact* that shading has had on the figures. A value of 95% indicates that shading removed 5% of the average median-forecast value. The shade_ratio is used to provide an estimated shaded-hindcast value.
+
+The 'FCHC_ratio' is the forecast (average from yesterday) to the hindcast, and is an indicator of the accuracy of the Solcast forecast itself. A value of 115% indicates that Solcast over-estimated the forecast by 15% (assuming that the post-event hindcast is in itself entirely accurate). Note that since the 'forecast' for analysis is the average of all forecasts from the day, the individual forecast accuracy will change as the day progresses.
+
+The remaining actual ratios (actual to forecast, actual to average shaded forecast, actual to first shaded, actual to hindcast, and actual to shaded hindcast) provide insight to the performance of the real-world forecast. In the example shown above, for practical use on the day in question, the 'shaded forecast' will be the latest available figure for use. Hence the in-day accuracy for yesterday turned out to be 94%, that is, the recorded actual solar PV generated was 94% of the shade-modified Solcast Forecast. For computation, the forecast value used is the *average*, and it may be more appropriate to use the very *first* (of possibly several) forecasts. The actual to first-shaded-forecast ratio, here 83%, indicating that the Solar PV recorded was 83% of the first obtained shaded forecast of the day. This provides a wealth of information that can be used for in-depth analysis of the Solcast forecast accuracy against other factors such as season and local weather.
+
+</details>
+
 ## Home Assistant Sensors
 
 Several Home Assistant sensors are provided for passing *state* and *attribute* values to Home Assistant. These are updated at various times, and are *examples* of the data that can be passed to Home Assistant. Although entirely useable 'as is', there is great flexibility for changing sensor values to suit particular requirements.
@@ -820,6 +844,22 @@ Attribute fields hold:
 - the remaining forecast energy (sum of forward periods not including this one)
 - solar-cumulative-percent value, as the ratio of current total actual solar energy to sum of all forecasts to this point: 85 means that actual solar energy so far is 85 percent of the forecasted value to this point in time
 - solar-day-percent value, as the ratio of current total actual solar energy to the entire day forecast
+- the forecast data *array*, of all periods with a non-zero forecast value, with each array half-hour period *item* being
+  - the start time as string "hh:mm" in local time
+  - the equivalent Unix millisecond
+  - forecast power values for low, shaded, median, high figures
+  - the actual energy (power equivalent) recorded for the period, if period ends before 'now'
+  - ratio of the actual solar to shaded forecast for the period as integer percentage
+  - 'upfc' and 'upact' Boolean flags, if a forecast update and if actual values have been recorded for this period
+  - 'isshaded' Boolean flag if this period is within the shading period array
+  - cumulative values for low, shaded, median and high forecasts, and for actual solar, as the summation of all periods upto and including this one
+  - 'cum_ratio' being the ratio between cumulative actual and cumulative shaded forecast to this point
+  - 'position', which is a string value indicating the current cumulative performance as one of:
+    - 'Low' - below Solcast low forecast figure
+    - 'Below' - between low and (low+shaded)/2
+    - 'Target' - between (low+shaded)/2 and (shaded+high)/2
+    - 'Above' - between (shaded+high)/2 and high
+    - 'High' - above Solcast high forecast figure
 
 </details>
 
