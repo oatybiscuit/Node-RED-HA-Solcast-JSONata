@@ -783,6 +783,22 @@ Attributes hold:
 - the hind-cast for yesterday (Solcast estimates of what actually happened)
 - a ratio for yesterday, as *actual* energy generated yesterday, divided by yesterday *hind-cast* total energy
 - the shade array
+- summary analysis details from yesterday, as:
+  - the date (yesterday)
+  - actual solar energy
+  - average of all (median) forecasts for the day
+  - average of all shaded forecasts for the day
+  - the first shaded forecast
+  - the hindcast value (if hindcast has been called)
+  - a ratio of shaded forecast to forecast, indicating the amount of shading applied
+  - a shaded hindcast estimate
+  - ratio (integer percentage) for:
+    - forecast to hindcast
+    - actual to forecast
+    - actual to average shaded forecast
+    - actual to first shaded forecast
+    - actual to hindcast
+    - actual to shaded hindcast
 
 **Note** that the yesterday-ratio calculation uses the **hind-cast** (estimates) returned by Solcast and not the "what was forecast for 'today' yesterday". This gives the *best-possible* ratio, since Solcast will return for a hind-cast the *best-estimate* of the historic-forecast, given everything now known. This figure should therefore be close to 100%.
 
